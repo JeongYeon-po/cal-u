@@ -4,59 +4,140 @@
   <meta charset="UTF-8">
   <title>모임 날짜 조율기</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; }
-    table { border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid #ccc; text-align: center; padding: 8px; }
-    td.selected-x { background-color: #f66; color: white; }
-    td.selected-o { background-color: #6f6; color: white; }
-    td:hover { cursor: pointer; background-color: #eee; }
+    body { font-family: sans-serif; padding: 20px; display: flex; gap: 30px; }
+    .calendar-box { width: 65%; }
+    .calendar-header { text-align: center; font-size: 1.5em; margin-bottom: 10px; }
+    .calendar-table { border-collapse: collapse; width: 100%; }
+    .calendar-table th, .calendar-table td {
+      border: 1px solid #ccc;
+      width: 14.28%;
+      height: 60px;
+      text-align: center;
+      vertical-align: middle;
+    }
+    .calendar-table td:hover { cursor: pointer; background: #eee; }
+    .x-mark { background-color: #f66; color: white; }
+    .o-mark { background-color: #6c6; color: white; }
+
+    .side-box { width: 30%; }
+    .summary { font-size: 0.95em; margin-bottom: 20px; }
+    .user-list { border: 1px solid #aaa; padding: 10px; }
+    .user-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+    .color-box {
+      width: 20px; height: 20px;
+      border: 1px solid #000;
+      display: inline-block;
+    }
+    .add-user-btn {
+      margin-top: 10px;
+      padding: 5px 10px;
+      border-radius: 50%;
+      border: 1px solid #888;
+      font-size: 1.2em;
+      cursor: pointer;
+      background-color: white;
+    }
   </style>
 </head>
 <body>
-  <h1>📅 2025년 7월 모임 날짜 조율</h1>
-  <p>날짜를 클릭해서 <strong>X (불가능)</strong> 또는 <strong>O (가능)</strong> 표시를 토글하세요.</p>
-  <table id="calendar">
-    <thead>
-      <tr><th>날짜</th><th>상태</th></tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <div class="calendar-box">
+    <div class="calendar-header">📅 모임 이름: <strong>친구모임</strong> - 2025년 7월</div>
+    <table class="calendar-table" id="calendar">
+      <thead>
+        <tr><th>일</th><th>월</th><th>화</th><th>수</th><th>목</th><th>금</th><th>토</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="side-box">
+    <div class="summary">
+      <p><strong>가능한 날짜 (⭕ 모두 O일):</strong></p>
+      <ul id="available-dates"></ul>
+      <p><strong>O 없음 날짜:</strong></p>
+      <ul id="unavailable-dates"></ul>
+    </div>
+
+    <div class="user-list" id="user-list">
+      <div class="user-item">
+        <span>나</span>
+        <span class="color-box" style="background:red"></span>
+      </div>
+    </div>
+    <button class="add-user-btn" onclick="alert('아직 기능 준비 중!')">＋</button>
+  </div>
 
   <script>
-    const tbody = document.querySelector('#calendar tbody');
-    const start = new Date(2025, 6, 1); // 7월은 index 6
-    const end = new Date(2025, 6, 31);
+    const year = 2025;
+    const month = 6; // JS 기준 0=1월
+    const calendarBody = document.querySelector("#calendar tbody");
+    const availableDatesEl = document.getElementById("available-dates");
+    const unavailableDatesEl = document.getElementById("unavailable-dates");
+    const statusMap = {}; // 날짜별 상태 저장 (예: '2025-07-14': 'X')
 
-    function formatDate(d) {
-      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    function getLastDate(y, m) {
+      return new Date(y, m + 1, 0).getDate();
     }
 
-    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-      const tr = document.createElement('tr');
-      const tdDate = document.createElement('td');
-      const tdStatus = document.createElement('td');
+    function buildCalendar() {
+      calendarBody.innerHTML = "";
+      const firstDay = new Date(year, month, 1).getDay();
+      const lastDate = getLastDate(year, month);
+      let day = 1;
 
-      const dateStr = formatDate(d);
-      tdDate.textContent = dateStr;
-      tdStatus.textContent = '-';
+      for (let i = 0; i < 6; i++) {
+        const row = document.createElement("tr");
+        for (let j = 0; j < 7; j++) {
+          const cell = document.createElement("td");
 
-      tdStatus.onclick = () => {
-        if (tdStatus.textContent === '-') {
-          tdStatus.textContent = 'X';
-          tdStatus.className = 'selected-x';
-        } else if (tdStatus.textContent === 'X') {
-          tdStatus.textContent = 'O';
-          tdStatus.className = 'selected-o';
-        } else {
-          tdStatus.textContent = '-';
-          tdStatus.className = '';
+          if (i === 0 && j < firstDay) {
+            cell.textContent = "";
+          } else if (day > lastDate) {
+            cell.textContent = "";
+          } else {
+            const dateKey = `${year}-07-${String(day).padStart(2,'0')}`;
+            cell.textContent = day;
+            cell.dataset.date = dateKey;
+            cell.onclick = () => toggleStatus(cell, dateKey);
+            day++;
+          }
+          row.appendChild(cell);
         }
-      };
-
-      tr.appendChild(tdDate);
-      tr.appendChild(tdStatus);
-      tbody.appendChild(tr);
+        calendarBody.appendChild(row);
+      }
     }
+
+    function toggleStatus(cell, dateKey) {
+      if (!statusMap[dateKey]) {
+        statusMap[dateKey] = "X";
+        cell.className = "x-mark";
+      } else if (statusMap[dateKey] === "X") {
+        statusMap[dateKey] = "O";
+        cell.className = "o-mark";
+      } else {
+        delete statusMap[dateKey];
+        cell.className = "";
+      }
+      updateSummary();
+    }
+
+    function updateSummary() {
+      availableDatesEl.innerHTML = "";
+      unavailableDatesEl.innerHTML = "";
+      Object.keys(statusMap).forEach(date => {
+        if (statusMap[date] === "O") {
+          availableDatesEl.innerHTML += `<li>${date}</li>`;
+        }
+      });
+      Object.keys(statusMap).forEach(date => {
+        if (statusMap[date] === "X") {
+          unavailableDatesEl.innerHTML += `<li>${date}</li>`;
+        }
+      });
+    }
+
+    buildCalendar();
   </script>
 </body>
 </html>
+
