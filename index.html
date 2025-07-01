@@ -1,144 +1,16 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>모임 캘린더 V3.5</title>
-  <style>
-    /* 디자인 스타일 생략 - 실제에선 모바일 대응 포함 */
-    body { font-family: sans-serif; margin: 0; padding: 1rem; }
-    #calendar { max-width: 600px; margin: auto; }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { border: 1px solid #ccc; width: 14.28%; height: 80px; text-align: center; vertical-align: top; }
-    .today { outline: 2px solid red; border-radius: 50%; }
-    .user-x { background-color: rgba(255,0,0,0.3); }
-    .user-o { background-color: rgba(0,255,0,0.3); }
-  </style>
+  <title>모임 일정 조율 캘린더 V4</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h2>📅 친구모임 날짜 조율 캘린더</h2>
-  <div id="calendar-controls">
-    <button onclick="changeMonth(-1)">◀ 이전달</button>
-    <span id="month-label"></span>
-    <button onclick="changeMonth(1)">다음달 ▶</button>
+  <div id="app">
+    <!-- 실제 캘린더와 사용자 인터페이스는 여기에 동적으로 삽입됩니다 -->
   </div>
-  <div id="calendar"></div>
-  <div style="margin-top: 1rem;">
-    <label>이름: <input id="username" placeholder="홍길동"/></label>
-    <label>색상: 
-      <input type="color" id="usercolor" />
-      <label><input type="checkbox" id="anyday"> 상관없음</label>
-    </label>
-    <button onclick="submitAvailability()">제출</button>
-  </div>
-  <h3>📌 가능한 날짜 (X 없는 날)</h3>
-  <div id="available-dates"></div>
-
-  <script>
-    let currentDate = new Date();
-    let availability = {}; // 날짜별 사용자 저장
-    let submittedUsers = new Set();
-
-    function renderCalendar() {
-      const year = currentDate.getFullYear();
-      const month = currentDate.getMonth();
-      document.getElementById('month-label').textContent = `${year}년 ${month+1}월`;
-
-      const firstDay = new Date(year, month, 1).getDay();
-      const lastDate = new Date(year, month+1, 0).getDate();
-
-      let html = "<table><tr>";
-      const days = ["일", "월", "화", "수", "목", "금", "토"];
-      for (let d of days) html += `<th>${d}</th>`;
-      html += "</tr><tr>";
-
-      let dayCounter = 1 - firstDay;
-      while (dayCounter <= lastDate) {
-        for (let i = 0; i < 7; i++) {
-          if (dayCounter > 0 && dayCounter <= lastDate) {
-            const dateStr = `${year}-${month+1}-${dayCounter}`;
-            const users = availability[dateStr] || {};
-
-            let style = "";
-            let title = Object.entries(users).map(([u, v]) => `${u}:${v}`).join(", ");
-            let bgClass = "";
-            for (let u in users) {
-              if (users[u] === "X") {
-                bgClass = "user-x";
-                break;
-              } else if (users[u] === "O") {
-                bgClass = "user-o";
-              }
-            }
-
-            const today = new Date();
-            const isToday = today.getDate() === dayCounter &&
-                            today.getMonth() === month &&
-                            today.getFullYear() === year;
-
-            html += `<td class="${bgClass}${isToday ? ' today' : ''}" title="${title}" onclick="toggleDate('${dateStr}')">${dayCounter}</td>`;
-          } else {
-            html += "<td></td>";
-          }
-          dayCounter++;
-        }
-        html += "</tr>";
-        if (dayCounter <= lastDate) html += "<tr>";
-      }
-
-      html += "</table>";
-      document.getElementById("calendar").innerHTML = html;
-      updateAvailableDates();
-    }
-
-    function changeMonth(delta) {
-      currentDate.setMonth(currentDate.getMonth() + delta);
-      renderCalendar();
-    }
-
-    function toggleDate(dateStr) {
-      const user = document.getElementById('username').value.trim();
-      if (!user) return alert("이름을 입력하세요");
-
-      if (!availability[dateStr]) availability[dateStr] = {};
-      const current = availability[dateStr][user];
-      if (current === "X") availability[dateStr][user] = "O";
-      else if (current === "O") delete availability[dateStr][user];
-      else availability[dateStr][user] = "X";
-
-      renderCalendar();
-    }
-
-    function submitAvailability() {
-      const user = document.getElementById('username').value.trim();
-      const anyday = document.getElementById('anyday').checked;
-      if (!user) return alert("이름을 입력하세요");
-
-      submittedUsers.add(user);
-      if (anyday) {
-        const year = currentDate.getFullYear();
-        const month = currentDate.getMonth();
-        const lastDate = new Date(year, month+1, 0).getDate();
-        for (let d = 1; d <= lastDate; d++) {
-          const ds = `${year}-${month+1}-${d}`;
-          if (!availability[ds]) availability[ds] = {};
-          availability[ds][user] = "O";
-        }
-      }
-
-      renderCalendar();
-    }
-
-    function updateAvailableDates() {
-      const dates = Object.entries(availability)
-        .filter(([date, users]) => Object.values(users).every(v => v !== "X"))
-        .map(([date]) => date.replace(/\d{4}-/, "")); // 년도 제거
-
-      document.getElementById("available-dates").textContent = dates.join(", ");
-    }
-
-    renderCalendar();
-  </script>
+  <script src="firebase-config.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
