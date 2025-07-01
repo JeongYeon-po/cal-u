@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>모임 날짜 조율기</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ccc; text-align: center; padding: 8px; }
+    td.selected-x { background-color: #f66; color: white; }
+    td.selected-o { background-color: #6f6; color: white; }
+    td:hover { cursor: pointer; background-color: #eee; }
+  </style>
+</head>
+<body>
+  <h1>📅 2025년 7월 모임 날짜 조율</h1>
+  <p>날짜를 클릭해서 <strong>X (불가능)</strong> 또는 <strong>O (가능)</strong> 표시를 토글하세요.</p>
+  <table id="calendar">
+    <thead>
+      <tr><th>날짜</th><th>상태</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const tbody = document.querySelector('#calendar tbody');
+    const start = new Date(2025, 6, 1); // 7월은 index 6
+    const end = new Date(2025, 6, 31);
+
+    function formatDate(d) {
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      const tr = document.createElement('tr');
+      const tdDate = document.createElement('td');
+      const tdStatus = document.createElement('td');
+
+      const dateStr = formatDate(d);
+      tdDate.textContent = dateStr;
+      tdStatus.textContent = '-';
+
+      tdStatus.onclick = () => {
+        if (tdStatus.textContent === '-') {
+          tdStatus.textContent = 'X';
+          tdStatus.className = 'selected-x';
+        } else if (tdStatus.textContent === 'X') {
+          tdStatus.textContent = 'O';
+          tdStatus.className = 'selected-o';
+        } else {
+          tdStatus.textContent = '-';
+          tdStatus.className = '';
+        }
+      };
+
+      tr.appendChild(tdDate);
+      tr.appendChild(tdStatus);
+      tbody.appendChild(tr);
+    }
+  </script>
+</body>
+</html>
