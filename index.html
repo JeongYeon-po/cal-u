@@ -5,6 +5,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cal-U | 모임 일정 조율</title>
   <link rel="stylesheet" href="style.css" />
+<!-- Firebase v8 SDK (CDN 방식, firebase.* 접근 가능) -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCaRdS6DWMNd8LyGvWnO61MsOp49QuUFKU",
+    authDomain: "cal-u-c17a9.firebaseapp.com",
+    projectId: "cal-u-c17a9",
+    storageBucket: "cal-u-c17a9.firebasestorage.app",
+    messagingSenderId: "237824369858",
+    appId: "1:237824369858:web:86d924f7dcac9a4163075b",
+    measurementId: "G-825J221WP5"
+  };
+
+  // ✅ v8 방식 초기화
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+</script>
+
+
   <script defer src="script.js"></script>
 </head>
 <body>
@@ -14,7 +35,9 @@
     <div class="header">
       <label><b>모임 이름:</b></label>
       <input type="text" id="meetingName" placeholder="모임 이름을 입력하세요" />
+ <button id="copyLinkBtn">링크 복사</button>
     </div>
+ 
 
     <!-- 사용자 정보: 이름·색상·상관없음 -->
     <div class="user-info">
@@ -28,6 +51,8 @@
         <option value="purple">🟣 보라색</option>
       </select>
       <label><input type="checkbox" id="noPreference" /> 상관없음</label>
+<label style="margin-left:10px;"><input type="checkbox" id="blockSat"/> 토요일 불가</label>
+     <label style="margin-left:10px;"><input type="checkbox" id="blockSun"/> 일요일 불가</label>
     </div>
 
     <hr />

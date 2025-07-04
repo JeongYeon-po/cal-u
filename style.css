@@ -108,3 +108,23 @@ body {
   word-break: break-word;
 }
 .result thead tr { background: #f2f2f2; }
+
+/* 1) 링크 복사 버튼 */
+#copyLinkBtn {
+  margin-left: 8px;
+  padding: 3px 6px;
+  font-size: 0.9em;
+  cursor: pointer;
+}
+
+/* 2) 주말 불가 체크박스 라벨 정렬 */
+.user-info label {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* ✅ 모든 유저가 가능한 날 */
+.date.all-available {
+  background: gold;
+  box-shadow: inset 0 0 0 2px #aaa;
+}
